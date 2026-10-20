@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SLFRF Project Planning Guide</title>
+<meta name="description" content="An interactive SLFRF project planning guide: find the expenditure category for a project and see the reporting it triggers before funds are obligated. Built by Cam Smith, CIA, CGAP.">
+<meta name="theme-color" content="#22262C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2322262C'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='%23E2AC2C' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Tokens from camsmith.xyz/grants (light gray and white page, dark charcoal banner, gold accent). */
+:root{
+  --ink:#F6F6F4; --panel:#EEEEEB; --tile:#FFFFFF; --tile-lit:#FFF5D6;
+  --line:#DEDED9; --line-2:#CDCDC7; --line-3:#B3B3AC;
+  --fg:#23262B; --fg-strong:#0E1116; --soft:#3A3F47; --muted:#4D535B; --faint:#676D76;
+  --lamp:#8A5A00; --lamp-hi:#6B4500; --gold:#E2AC2C; --gold-soft:rgba(226,172,44,.16);
+  --banner:#22262C; --banner-fg:#F4F3EF; --banner-soft:rgba(244,243,239,.74);
+  --pdd:#2F63C9; --ebi:#3F7A1A; --prog:#7445C7; --infra:#08788E;
+  --display:'Archivo','Arial Narrow',system-ui,sans-serif;
+  --body:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+[hidden]{display:none!important}
+a{color:var(--lamp)} a:hover{color:var(--lamp-hi)}
+h1,h2,h3{text-wrap:balance}
+p{text-wrap:pretty}
+:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+.wrap{max-width:1200px;margin:0 auto;padding-inline:max(16px,env(safe-area-inset-left,0px))}
+@media (min-width:700px){.wrap{padding-inline:24px}}
+button{font:inherit;color:inherit}
+
+/* banner */
+.banner{background:var(--banner);color:var(--banner-fg)}
+.banner .wrap{padding-block:22px 46px}
+.bar{display:flex;justify-content:space-between;gap:12px;align-items:center;font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.bar a{color:var(--banner-soft);text-decoration:none} .bar a:hover{color:var(--banner-fg)}
+.eyebrow{margin:44px 0 14px;font:500 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+h1{margin:0;font-family:var(--display);font-weight:800;font-stretch:78%;font-size:clamp(40px,6.4vw,78px);line-height:.98;letter-spacing:-.01em}
+.lede{margin:18px 0 0;max-width:62ch;font-size:clamp(17px,1.6vw,19px);color:var(--banner-soft)}
+.note{margin:22px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 11.5px/1 var(--mono);letter-spacing:.04em;padding:7px 10px;border-radius:999px;border:1px solid rgba(244,243,239,.22);color:var(--banner-soft)}
+
+/* sections */
+section.part{padding-block:44px 8px}
+.num{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--lamp)}
+h2{margin:10px 0 6px;font-family:var(--display);font-weight:800;font-stretch:85%;font-size:clamp(26px,3.2vw,36px);line-height:1.05;color:var(--fg-strong)}
+.sub{margin:0 0 20px;max-width:70ch;color:var(--muted)}
+
+/* step 1: statutory uses */
+.uses{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-bottom:22px}
+.use{appearance:none;text-align:left;cursor:pointer;background:var(--tile);border:1px solid var(--line);border-radius:12px;padding:14px 14px 13px;display:flex;flex-direction:column;gap:6px;transition:border-color .15s,box-shadow .15s}
+.use:hover{border-color:var(--line-3)}
+.use[aria-pressed="true"]{border-color:var(--fg-strong);box-shadow:0 0 0 1px var(--fg-strong);background:var(--tile-lit)}
+.use .k{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.use .t{font-weight:700;font-size:15px;line-height:1.25;color:var(--fg-strong)}
+.use .g{font-size:12.5px;color:var(--muted);line-height:1.35}
+.usetext{margin:-8px 0 22px;padding:12px 14px;border-left:3px solid var(--gold);background:var(--gold-soft);border-radius:0 8px 8px 0;font-size:14.5px;color:var(--soft);max-width:80ch}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.filters .lbl{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-right:4px}
+.tog{appearance:none;cursor:pointer;border:1px solid var(--line-2);background:var(--tile);border-radius:999px;padding:7px 11px;font:500 12px/1 var(--mono);display:inline-flex;gap:7px;align-items:center}
+.tog[aria-pressed="true"]{background:var(--fg-strong);color:#fff;border-color:var(--fg-strong)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.search{flex:1 1 220px;min-width:0;max-width:340px;border:1px solid var(--line-2);border-radius:999px;padding:8px 14px;background:var(--tile);font:400 14px/1 var(--body)}
+
+/* step 2: categories + detail */
+.finder{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:16px;align-items:start}
+@media (max-width:900px){.finder{grid-template-columns:1fr}}
+.list{background:var(--tile);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.ghead{padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line);font:600 12px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--soft)}
+.cat{appearance:none;width:100%;text-align:left;cursor:pointer;border:0;border-bottom:1px solid var(--line);background:none;padding:11px 14px;display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:start}
+.cat:last-child{border-bottom:0}
+.cat:hover{background:#FAFAF8}
+.cat[aria-selected="true"]{background:var(--tile-lit);box-shadow:inset 3px 0 0 var(--gold)}
+.cat .code{font:600 13px/1.4 var(--mono);color:var(--lamp)}
+.cat .nm{font-size:14.5px;line-height:1.35;color:var(--fg-strong)}
+.flags{display:flex;gap:4px;padding-top:3px}
+.flag{font:600 10px/1 var(--mono);letter-spacing:.04em;padding:4px 5px;border-radius:4px;color:#fff;background:var(--c)}
+.empty{padding:18px 14px;color:var(--faint);font-size:14px}
+
+.detail{position:sticky;top:16px;background:var(--tile);border:1px solid var(--line);border-radius:12px;padding:20px 20px 8px}
+@media (max-width:900px){.detail{position:static}}
+.detail .dk{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.detail h3{margin:8px 0 10px;font-family:var(--display);font-weight:800;font-stretch:88%;font-size:24px;line-height:1.12;color:var(--fg-strong)}
+.detail h3 .code{color:var(--lamp);margin-right:8px}
+.detail .elig{margin:0 0 16px;color:var(--soft);font-size:15px}
+.detail .elig.none{color:var(--faint);font-style:italic}
+.req{border-top:1px solid var(--line);padding:14px 0}
+.req h4{margin:0 0 8px;display:flex;align-items:center;gap:8px;font-size:15px;color:var(--fg-strong)}
+.req h4 .flag{font-size:10.5px}
+.req p{margin:0 0 8px;font-size:14.5px;color:var(--soft)}
+.req ul,.req ol{margin:0 0 6px;padding-left:20px;font-size:14.5px;color:var(--soft)}
+.req li{margin:3px 0}
+.req .small{font-size:13px;color:var(--muted)}
+.none-req{border-top:1px solid var(--line);padding:14px 0;font-size:14.5px;color:var(--muted)}
+.placeholder{color:var(--muted);font-size:15px;padding-bottom:12px}
+
+/* form */
+.form{background:var(--tile);border:1px solid var(--line);border-radius:12px;overflow:hidden;max-width:880px}
+.frow{display:grid;grid-template-columns:220px 1fr;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.frow:last-child{border-bottom:0}
+@media (max-width:600px){.frow{grid-template-columns:1fr;gap:4px}}
+.frow .f{font-weight:700;font-size:14.5px;color:var(--fg-strong)}
+.frow .v{font-size:14.5px;color:var(--soft)}
+.frow .v .auto{font:600 13px/1.4 var(--mono);color:var(--lamp)}
+.frow .v .hint{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+.fsec{padding:9px 16px;background:var(--panel);font:600 11.5px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--soft);border-bottom:1px solid var(--line)}
+
+/* subawards */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;counter-reset:s}
+.step{background:var(--tile);border:1px solid var(--line);border-radius:12px;padding:16px}
+.step .k{font:600 12px/1 var(--mono);color:var(--lamp)}
+.step h3{margin:8px 0 8px;font-size:17px;line-height:1.25;color:var(--fg-strong)}
+.step p,.step li{font-size:14px;color:var(--soft)}
+.step p{margin:0 0 8px}
+.step ul{margin:0 0 8px;padding-left:18px}
+.step .tool{font:500 12px/1.4 var(--mono);color:var(--muted)}
+details.exhibit{margin-top:14px;background:var(--tile);border:1px solid var(--line);border-radius:12px;max-width:880px}
+details.exhibit summary{cursor:pointer;padding:14px 16px;font-weight:700;color:var(--fg-strong)}
+details.exhibit .in{padding:0 16px 14px}
+details.exhibit table{width:100%;border-collapse:collapse;font-size:14px}
+details.exhibit td{border-top:1px solid var(--line);padding:8px 6px;vertical-align:top;color:var(--soft)}
+details.exhibit td:first-child{width:62%;color:var(--fg)}
+details.exhibit td.blank{color:var(--faint);font-family:var(--mono);font-size:12.5px}
+
+/* framework */
+.frame{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.fcard{background:var(--tile);border:1px solid var(--line);border-radius:12px;padding:16px}
+.fcard h3{margin:0 0 8px;font-size:16px;color:var(--fg-strong)}
+.fcard p{margin:0;font-size:14px;color:var(--soft)}
+
+/* resources + footer */
+.res{columns:2 320px;column-gap:24px;padding-left:18px;margin:0;max-width:980px}
+.res li{break-inside:avoid;margin:0 0 8px;font-size:14.5px}
+footer{margin-top:56px;border-top:1px solid var(--line);padding-block:22px 40px;font:400 12.5px/1.6 var(--mono);color:var(--faint)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="wrap">
+    <div class="bar"><a href="https://www.camsmith.xyz">Cam Smith, CIA, CGAP</a><a href="README.md">Read me first</a></div>
+    <p class="eyebrow">American Rescue Plan Act · Coronavirus State and Local Fiscal Recovery Funds · ALN 21.027</p>
+    <h1>SLFRF Project Planning Guide</h1>
+    <p class="lede">A guide for program staff to determine a project's eligibility and expenditure category, and to identify its reporting requirements before agreements are executed or funds are obligated.</p>
+    <div class="note">
+      <span class="chip">Built under the Interim Final Rule, 2021</span>
+      <span class="chip">Demo</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="part" aria-labelledby="h-find">
+    <div class="wrap">
+      <div class="num">01 · Find the category</div>
+      <h2 id="h-find">Start from the statutory use</h2>
+      <p class="sub">Pick the eligible use closest to the project's scope, then the expenditure category. The category sets the reporting: project demographic distribution (PDD), evidence-based interventions (EBI), programmatic data, and for water, sewer and broadband, infrastructure detail.</p>
+
+      <div class="uses" id="uses" role="group" aria-label="Statutory eligible uses"></div>
+      <p class="usetext" id="usetext" hidden></p>
+
+      <div class="filters" role="group" aria-label="Filter categories">
+        <span class="lbl">Requires</span>
+        <button class="tog" type="button" data-f="pdd" aria-pressed="false"><span class="dot" style="--c:var(--pdd)"></span>PDD</button>
+        <button class="tog" type="button" data-f="ebi" aria-pressed="false"><span class="dot" style="--c:var(--ebi)"></span>EBI</button>
+        <button class="tog" type="button" data-f="prog" aria-pressed="false"><span class="dot" style="--c:var(--prog)"></span>Programmatic</button>
+        <input class="search" id="q" type="search" placeholder="Search categories and eligible uses" aria-label="Search categories and eligible uses">
+      </div>
+
+      <div class="finder">
+        <div class="list" id="list" role="listbox" aria-label="Expenditure categories"></div>
+        <aside class="detail" id="detail" aria-live="polite"></aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="h-form">
+    <div class="wrap">
+      <div class="num">02 · Request the project</div>
+      <h2 id="h-form">The project request form</h2>
+      <p class="sub">A project request sets the project up in the financial system before any money moves. The reporting answers fill in from the category picked above.</p>
+      <div class="form" id="form"></div>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="h-sub">
+    <div class="wrap">
+      <div class="num">03 · Subawards</div>
+      <h2 id="h-sub">When funds pass to another entity</h2>
+      <p class="sub" id="subintro"></p>
+      <div class="steps" id="steps"></div>
+      <details class="exhibit">
+        <summary>The agreement exhibit: federal award identification</summary>
+        <div class="in" id="exhibit"></div>
+      </details>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="h-frame">
+    <div class="wrap">
+      <div class="num">04 · The implementation guidance</div>
+      <h2 id="h-frame">The control the guide sits inside</h2>
+      <p class="sub">The planning guide was one exhibit to a written policy and implementation guidance, the recipient's key control for complying with SLFRF. Its framework:</p>
+      <div class="frame">
+        <div class="fcard"><h3>Purpose</h3><p>What SLFRF is, the recipient's responsibility for compliant use and documentation, and the guidance's scope: SLFRF only, not ARPA funds received through other federal programs.</p></div>
+        <div class="fcard"><h3>Governance</h3><p>The appropriation trail from the governing body's approvals, the initial funding allocations aligned to the statutory uses, reprogrammed funds, and each internal and external stakeholder's role.</p></div>
+        <div class="fcard"><h3>Planning and early implementation</h3><p>A finance, grants and budget management team meeting weekly, widened to program staff and project managers; grants management leads drawdowns and Treasury reporting, with portal access limited to trained staff.</p></div>
+        <div class="fcard"><h3>Key control updates</h3><p>The authorities the guidance tracks: the statute, the Interim and Final Rules and their FAQs, Treasury's compliance and reporting guidance, the Uniform Guidance, and the recipient's own grant policies.</p></div>
+        <div class="fcard"><h3>Program administration</h3><p>Administrative decisions (the revenue loss calculation, a dedicated fund, project fields for expenditure categories), this planning guide and the request form, a continuous training program, quarterly reporting, and subrecipient monitoring.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="part" aria-labelledby="h-res">
+    <div class="wrap">
+      <div class="num">05 · Resources</div>
+      <h2 id="h-res">The guidance it was built on</h2>
+      <p class="sub">As listed in the guide in 2021. Treasury has since moved or replaced some of these.</p>
+      <ul class="res" id="res"></ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>SLFRF Project Planning Guide · built by <a href="https://www.camsmith.xyz">Cam Smith, CIA, CGAP</a>, 2021 · page by Opus 5.5 from her workbook</span>
+    <span>Not current Treasury guidance</span>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  var G = window.GUIDE;
+  var USES = [
+    { key: "1", title: "Public health and negative economic impacts", short: "Eligible use 1" },
+    { key: "2", title: "Premium pay", short: "Eligible use 2" },
+    { key: "3", title: "Revenue replacement", short: "Eligible use 3" },
+    { key: "4", title: "Water, sewer and broadband", short: "Eligible use 4" },
+    { key: "Administrative Costs", title: "Administrative costs", short: "Administration" }
+  ];
+  var FLAG = { pdd: ["PDD", "var(--pdd)"], ebi: ["EBI", "var(--ebi)"], prog: ["PRG", "var(--prog)"] };
+  var state = { use: null, filters: {}, q: "", code: null };
+
+  function el(tag, attrs, html) {
+    var e = document.createElement(tag);
+    if (attrs) for (var k in attrs) { if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function groupNum(g) { return parseInt(g, 10); }
+  function useOf(u) { return G.uses.filter(function (x) { return x.n === u; })[0]; }
+  function groupsFor(useKey) { var u = useOf(useKey); return u ? u.groups.map(groupNum) : []; }
+  function cat(code) { return G.categories.filter(function (c) { return c.code === code; })[0]; }
+  function inRange(code, key) {
+    var parts = key.split(" - "), v = parseFloat(code.split(".")[0]) * 100 + parseInt(code.split(".")[1], 10);
+    function n(s) { return parseFloat(s.split(".")[0]) * 100 + parseInt(s.split(".")[1], 10); }
+    return parts.length === 1 ? n(parts[0]) === v : v >= n(parts[0]) && v <= n(parts[1]);
+  }
+  function flags(c) {
+    return ["pdd", "ebi", "prog"].filter(function (f) { return c[f]; })
+      .map(function (f) { return '<span class="flag" style="--c:' + FLAG[f][1] + '" title="' + FLAG[f][0] + '">' + FLAG[f][0] + "</span>"; }).join("");
+  }
+
+  /* step 1 */
+  var usesEl = document.getElementById("uses");
+  USES.forEach(function (u) {
+    var data = useOf(u.key);
+    var b = el("button", { class: "use", type: "button", "aria-pressed": "false", "data-k": u.key },
+      '<span class="k">' + esc(u.short) + '</span><span class="t">' + esc(u.title) + '</span><span class="g">' +
+      esc(data.groups.join(" · ").replace(/\d+: /g, "")) + "</span>");
+    b.addEventListener("click", function () { state.use = state.use === u.key ? null : u.key; render(); });
+    usesEl.appendChild(b);
+  });
+
+  /* filters */
+  document.querySelectorAll(".tog").forEach(function (t) {
+    t.addEventListener("click", function () { var f = t.dataset.f; state.filters[f] = !state.filters[f]; t.setAttribute("aria-pressed", state.filters[f] ? "true" : "false"); render(); });
+  });
+  document.getElementById("q").addEventListener("input", function (e) { state.q = e.target.value.trim().toLowerCase(); render(); });
+
+  function visible() {
+    var gs = state.use ? groupsFor(state.use) : null;
+    return G.categories.filter(function (c) {
+      if (gs && gs.indexOf(groupNum(c.group)) < 0) return false;
+      for (var f in state.filters) if (state.filters[f] && !c[f]) return false;
+      if (state.q && (c.code + " " + c.name + " " + (c.eligible || "") + " " + c.group).toLowerCase().indexOf(state.q) < 0) return false;
+      return true;
+    });
+  }
+
+  function renderList() {
+    var list = document.getElementById("list"); list.innerHTML = "";
+    var cats = visible(), last = null;
+    if (!cats.length) { list.appendChild(el("div", { class: "empty" }, "No category matches. Clear a filter or the search.")); return; }
+    cats.forEach(function (c) {
+      if (c.group !== last) { list.appendChild(el("div", { class: "ghead" }, esc(c.group))); last = c.group; }
+      var b = el("button", { class: "cat", type: "button", role: "option", "aria-selected": c.code === state.code ? "true" : "false" },
+        '<span class="code">' + c.code + '</span><span class="nm">' + esc(c.name) + '</span><span class="flags">' + flags(c) + "</span>");
+      b.addEventListener("click", function () {
+        state.code = c.code; render();
+        if (window.matchMedia("(max-width:900px)").matches) document.getElementById("detail").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      list.appendChild(b);
+    });
+  }
+
+  function list(items) { return "<ul>" + items.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul>"; }
+
+  function renderDetail() {
+    var d = document.getElementById("detail"), c = state.code && cat(state.code);
+    if (!c) {
+      d.innerHTML = '<div class="dk">Expenditure category</div><h3>Pick a category</h3><p class="placeholder">Its eligible uses and the reporting it triggers show here. ' +
+        G.categories.filter(function (x) { return x.pdd; }).length + " of the " + G.categories.length + " categories require PDD reporting, " +
+        G.categories.filter(function (x) { return x.ebi; }).length + " EBI, and " + G.categories.filter(function (x) { return x.prog; }).length + " programmatic data.</p>";
+      return;
+    }
+    var h = '<div class="dk">' + esc(c.group) + "</div>" +
+      '<h3><span class="code">' + c.code + "</span>" + esc(c.name) + "</h3>" +
+      (c.eligible ? '<p class="elig">' + esc(c.eligible) + "</p>" : '<p class="elig none">The guide lists no examples for this category; check the rule and Treasury\'s FAQs.</p>');
+    var any = false;
+    if (c.pdd) {
+      any = true;
+      h += '<div class="req"><h4><span class="flag" style="--c:var(--pdd)">PDD</span>Project demographic distribution</h4><p>' + esc(G.pdd.intro[0]) +
+        "</p><p class=\"small\">The project must meet one of these:</p><ol>" + G.pdd.criteria.map(function (k, i) {
+          var label = ["HUD QCT locator", "2021 QCT list", "Census median income", "Census poverty thresholds"][i] || "Source";
+          return "<li>" + esc(k.text.replace(/^\d+\.\s*/, "").replace(/;\s*(or)?\s*$/, "").replace(/\.$/, "")) + (k.url ? ' <a href="' + esc(k.url) + '" target="_blank" rel="noopener">' + label + " ↗</a>" : "") + "</li>"; }).join("") +
+        '</ol><p class="small">' + esc(G.pdd.intro[1]) + "</p></div>";
+    }
+    if (c.ebi) {
+      any = true;
+      h += '<div class="req"><h4><span class="flag" style="--c:var(--ebi)">EBI</span>Evidence-based interventions</h4><p>' + esc(G.ebi.reporting) +
+        '</p><p class="small">Collect: ' + G.ebi.fields.map(esc).join(" · ") + '.</p><p class="small">' + esc(G.ebi.definition) + "</p></div>";
+    }
+    if (c.prog) {
+      any = true;
+      var keys = Object.keys(G.programmatic).filter(function (k) { return inRange(c.code, k); });
+      var items = keys.length ? G.programmatic[keys[0]] : null;
+      var isInfra = groupNum(c.group) === 5;
+      h += '<div class="req"><h4><span class="flag" style="--c:var(--prog)">PRG</span>Programmatic data</h4>' +
+        (items ? "<p>Required for EC " + esc(keys[0]) + ":</p>" + list(items) :
+          isInfra ? "<p>Reported through the infrastructure detail below.</p>" :
+          '<p class="small">The guide marks programmatic reporting for this category without listing the data points; Treasury\'s reporting guidance sets them.</p>') + "</div>";
+    }
+    if (groupNum(c.group) === 5) {
+      any = true;
+      var broad = c.code === "5.16" || c.code === "5.17";
+      h += '<div class="req"><h4><span class="flag" style="--c:var(--infra)">INF</span>Infrastructure detail</h4><p>' + esc(G.infrastructure.intro) + "</p>" +
+        list(G.infrastructure.all) + '<p class="small">' + (broad ? "Broadband projects also report:" : "Water and sewer projects also report:") + "</p>" +
+        list(broad ? G.infrastructure.broadband : G.infrastructure.water) +
+        '<p class="small">' + esc(G.infrastructure.over10m[0]) + "</p>" + list(G.infrastructure.over10m.slice(1).map(function (s) { return s.replace(/^[a-d]\.\s*/, ""); })) + "</div>";
+    }
+    if (!any) h += '<div class="none-req">No PDD, EBI or programmatic reporting is marked for this category. Standard project and expenditure reporting still applies.</div>';
+    d.innerHTML = h;
+  }
+
+  function renderForm() {
+    var f = document.getElementById("form"), c = state.code && cat(state.code), h = "", sec = null;
+    var auto = {
+      "Expenditure Category": c ? c.code + " " + c.name : null,
+      "PDD? (Yes/No)": c ? (c.pdd ? "Yes" : "No") : null,
+      "EBI? (Yes/No)": c ? (c.ebi ? "Yes" : "No") : null,
+      "Programmatic? (Yes/No)": c ? (c.prog ? "Yes" : "No") : null
+    };
+    G.form.forEach(function (r) {
+      if (r.field === "Project Information") return;
+      if (r.group !== sec) { h += '<div class="fsec">' + (r.group === "project" ? "Project information" : "Reporting requirements") + "</div>"; sec = r.group; }
+      var v = auto[r.field];
+      h += '<div class="frow"><div class="f">' + esc(r.field) + '</div><div class="v">' +
+        (v ? '<span class="auto">' + esc(v) + "</span>" : (r.field in auto ? '<span class="hint" style="margin:0">Pick a category above.</span>' : "")) +
+        (r.note ? '<span class="hint">' + esc(r.note) + "</span>" : "") + "</div></div>";
+    });
+    f.innerHTML = h;
+  }
+
+  function renderStatic() {
+    var steps = G.instructions.steps.filter(function (s) { return /subrecipients/.test(s); })[0];
+    document.getElementById("subintro").textContent = steps || "";
+    var TOOLS = {
+      "Subrecipient vs. Contractor checklist": "AGA's checklist for determining a contractor or subrecipient relationship",
+      "Risk Assessment Tool": "AGA's Risk Assessment Monitoring Tool (2009)",
+      "SLFRF Terms and Conditions": "Treasury's SLFRF award terms and conditions",
+      "Agreement Exhibit Template": "The agreement exhibit template (below)"
+    };
+    var s = document.getElementById("steps"), i = 0;
+    G.subawards.forEach(function (r) {
+      i++;
+      var tools = [r.tool].concat(r.tools || []).filter(Boolean).map(function (t) { return TOOLS[t] || t; });
+      s.appendChild(el("div", { class: "step" }, '<div class="k">' + String(i).padStart(2, "0") + "</div><h3>" + esc(r.req) + "</h3>" +
+        (r.desc ? "<p>" + esc(r.desc) + "</p>" : "") + (r.items.length ? list(r.items) : "") +
+        (tools.length ? '<div class="tool">Tool: ' + tools.map(esc).join(" · ") + "</div>" : "")));
+    });
+    var ex = G.exhibit, lists = [], cur = null;
+    ex.lists.forEach(function (p) { if (/apply to the federal resources/.test(p)) { cur = { head: p, items: [] }; lists.push(cur); } else if (cur) cur.items.push(p.replace(/;?\s*(and)?\s*$/, "")); });
+    document.getElementById("exhibit").innerHTML =
+      "<table>" + ex.fields.map(function (r) { return "<tr><td>" + esc(r[0]) + '</td><td class="' + (r[1] ? "" : "blank") + '">' + (r[1] ? esc(r[1]) : "per agreement") + "</td></tr>"; }).join("") + "</table>" +
+      lists.map(function (l) { return '<p class="small" style="margin:14px 0 4px;color:var(--muted)">' + esc(l.head) + "</p>" + list(l.items); }).join("");
+    document.getElementById("res").innerHTML = G.resources.map(function (r) {
+      return '<li><a href="' + esc(r.url) + '" target="_blank" rel="noopener">' + esc(r.label) + "</a></li>"; }).join("");
+  }
+
+  function render() {
+    document.querySelectorAll(".use").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.k === state.use ? "true" : "false"); });
+    var ut = document.getElementById("usetext");
+    if (state.use) { ut.hidden = false; ut.textContent = useOf(state.use).text; } else ut.hidden = true;
+    if (state.code && visible().every(function (c) { return c.code !== state.code; })) state.code = null;
+    renderList(); renderDetail(); renderForm();
+  }
+
+  renderStatic(); render();
+})();
+</script>
+</body>
+</html>
