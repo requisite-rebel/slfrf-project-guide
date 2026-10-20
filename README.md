@@ -8,8 +8,9 @@ subaward steps.
 
 Demo: https://www.camsmith.xyz/slfrf
 
-I built the original as a grant manager in 2021, under the Interim Final Rule. This repo is that guide as built,
-with the recipient's details removed. **It is not current.** Treasury's Final Rule and later rules and guidance
+I built the original as a grant manager in 2021, under the Interim Final Rule, as an Excel workbook. This repo is
+that guide as built, with the recipient's details removed, as an interactive page, plus the original workbook to
+compare. **It is not current.** Treasury's Final Rule and later rules and guidance
 changed eligible uses, expenditure categories, reporting requirements and deadlines.
 
 ## Bring it current with your coding agent
@@ -33,6 +34,7 @@ current guidance, and your own award terms before anyone relies on it.
 | `data.js` | The guide's content as data. The page renders whatever is here. |
 | `AGENT_PROMPT.md` | Instructions for a coding agent to bring the guide current. |
 | `RESOURCES.md` | Primary sources, checked October 2026. |
+| `original/slfrf-project-planning-guide-2021.xlsx` | The original Excel workbook, with the recipient's details, comments and embedded files removed. |
 | `LICENSE` | MIT. |
 
 To run it locally, open `index.html`, or serve the folder:
